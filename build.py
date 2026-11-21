@@ -8,7 +8,7 @@
 import os, re, subprocess, sys
 import cpcpack
 
-CODE_LOC, DATA_LOC = 0x4000, 0x9800     # codigo desde &4000 (22 KB de margen); variables (~3 KB) desde &9800, por debajo de HIMEM de BASIC (&A67B)
+CODE_LOC, DATA_LOC = 0x4000, 0x9000     # codigo desde &4000 (20 KB de margen); variables (~3 KB) desde &9000, por debajo de HIMEM de BASIC (&A67B)
 
 def run(cmd):
     print("  $", " ".join(cmd))

@@ -1,7 +1,7 @@
 # El Roningasa Ronin — port para Amstrad CPC (464 / 664 / 6128)
 
 Port del juego de QL a Z80. Misma lógica, mismos 19 niveles (los genera `levels.py`, con su solver), mismo
-truco QWERTY. Funciona en cualquier CPC con disquetera; no necesita los 128 KB del 6128 (usa unos 24 KB).
+truco QWERTY. Funciona en cualquier CPC con disquetera; no necesita los 128 KB del 6128 (usa unos 20 KB).
 
 ## Cómo se juega
 | Acción | Teclas |

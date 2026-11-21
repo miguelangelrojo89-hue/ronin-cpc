@@ -286,13 +286,20 @@ static void draw_msg(void){                  /* mensajes en la barra lateral, ba
 }
 
 /* ---------- logica (identica a la version de QL) ---------- */
+static u8 lbuf[GH*GW];                       /* nivel descomprimido */
+static void unpack(u8 n){                    /* RLE: literal; si le sigue un byte con bit 7, es el total de repeticiones */
+  const u8*s=LEVRLE+LEVOFF[n]; u16 i=0; u8 c,k;
+  while(i<GH*GW){ c=*s++; lbuf[i++]=c;
+    if(*s&0x80){ k=*s++&0x7F; while(--k&&i<GH*GW) lbuf[i++]=c; } }
+}
 static void load(u8 full){
-  short x,y; u8 c; En*e;
+  short x,y; u8 c; En*e; u16 li=0;
   nen=0; haskey=0;
   for(x=0;x<2;x++) pb[x].on=0;
   for(x=0;x<4;x++) eb[x].on=0;
   for(x=0;x<15;x++) sl[x].v=0;
-  for(y=0;y<GH;y++) for(x=0;x<32;x++){ c=(x<GW)?LEVELS[lvl][y][x]:' '; g[y][x]=c;
+  unpack(lvl);
+  for(y=0;y<GH;y++) for(x=0;x<32;x++){ c=(x<GW)?lbuf[li++]:' '; g[y][x]=c;
     if(c=='P'){ p.x=p.sx=x; p.y=p.sy=y; g[y][x]=' '; }
     else if(c=='E'||c=='F'){ e=&en[nen]; e->x=e->sx=x; e->y=e->sy=y; e->dir=e->face=(c=='E')?1:-1;
       e->a=0; e->cd=0; e->dead=0; e->hat=nen&3; nen++; g[y][x]=' '; }

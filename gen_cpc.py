@@ -61,8 +61,32 @@ def arr(name, vals, typ="u8"):
     return "static const %s %s[%d]={%s};" % (typ, name, len(vals), ",".join(str(v) for v in vals))
 
 o = ["/* generado por gen_cpc.py -- no editar a mano */"]
-o.append("static const char LEVELS[19][15][29]={" + ",".join(
-    "{" + ",".join('"' + r.ljust(28) + '"' for r in L) + "}" for L in ALL) + "};")
+# niveles comprimidos (RLE): un caracter literal; si va seguido de un byte con el bit 7 activo,
+# ese byte (& 0x7F) es el numero total de repeticiones del caracter. 420 casillas por nivel (28x15).
+def rle(rows):
+    flat = ''.join(r.ljust(28)[:28] for r in rows); assert len(flat) == 420
+    out = bytearray(); i = 0
+    while i < len(flat):
+        c = flat[i]; n = 1
+        while i + n < len(flat) and flat[i + n] == c and n < 127: n += 1
+        assert ord(c) < 128
+        out.append(ord(c))
+        if n >= 3: out.append(0x80 | n); i += n
+        else: i += 1
+    return bytes(out)
+def unrle(b):
+    out = []; i = 0
+    while len(out) < 420:
+        c = b[i]; i += 1; out.append(chr(c))
+        if i < len(b) and b[i] & 0x80:
+            out += [chr(c)] * ((b[i] & 0x7F) - 1); i += 1
+    return ''.join(out)
+blobs = [rle(L) for L in ALL]
+for L, b in zip(ALL, blobs): assert unrle(b) == ''.join(r.ljust(28)[:28] for r in L), "RLE no reversible"
+offs = [0]
+for b in blobs: offs.append(offs[-1] + len(b))
+o.append(arr("LEVOFF", offs, "u16"))
+o.append(arr("LEVRLE", [v for b in blobs for v in b]))
 
 # jugador: 5 poses x 2 volteos
 pld = []; plm = []
